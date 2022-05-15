@@ -20,6 +20,7 @@ async function run() {
     try {
         await client.connect();
         const servicesCollection = client.db('doctors_portal').collection('services');
+        const bookingCollection = client.db('doctors_portal').collection('booking');
 
         app.get('/service', async (req, res) => {
             const query = {};
@@ -29,6 +30,35 @@ async function run() {
 
         })
 
+
+        app.get('/available', async (req, res) => {
+            const date = req.query.date || 'May 15, 2022';
+
+            // step 1: get All services
+            const services = await servicesCollection.find().toArray();
+            res.send(services);
+        })
+        /*
+       Api naming convention
+       
+        * app.get('/booking') // get all booking in this collection. or get more than 
+        one or by filter
+        *app.get('/booking/:id') // get a specific booking
+        *app post('/booking') // add a new booking
+        * app.patch('/booking/:id) // update 
+        * app delete('/booking/:id) // delete
+        */
+
+        app.post('/booking', async (req, res) => {
+            const booking = req.body;
+            const query = { treatment: booking.treatment, date: booking.date, patient: booking.patient }
+            const exists = await bookingCollection.findOne(query);
+            if (exists) {
+                return res.send({ success: false, booking: exists })
+            }
+            const result = await bookingCollection.insertOne(booking);
+            return res.send({ success: true, result });
+        })
 
     }
     finally {
