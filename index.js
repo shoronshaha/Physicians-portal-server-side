@@ -21,6 +21,7 @@ async function run() {
         await client.connect();
         const servicesCollection = client.db('doctors_portal').collection('services');
         const bookingCollection = client.db('doctors_portal').collection('booking');
+        const userCollection = client.db('doctors_portal').collection('users');
 
         app.get('/service', async (req, res) => {
             const query = {};
@@ -28,6 +29,18 @@ async function run() {
             const services = await cursor.toArray();
             res.send(services);
 
+        })
+
+        app.put('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const user = req.body;
+            const filter = { email: email };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await userCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
         })
 
         // warning
@@ -62,6 +75,7 @@ async function run() {
         *app.get('/booking/:id') // get a specific booking
         *app post('/booking') // add a new booking
         * app.patch('/booking/:id) // update 
+        * app.put('/booking/:id') // upsert => update (if exists) or insert (if doesn't exist)
         * app delete('/booking/:id) // delete
         */
 
@@ -70,7 +84,7 @@ async function run() {
             const patient = req.query.patient;
             const query = { patient: patient };
             const bookings = await bookingCollection.find(query).toArray();
-            res.send(bookings);
+            res.send(bookings); n
         })
 
         app.post('/booking', async (req, res) => {
