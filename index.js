@@ -64,9 +64,10 @@ async function run() {
                 currency: 'usd',
                 payment_method_types: ['card']
             });
-            res.send({ clientSecret: paymentIntent.client_secret })
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
         });
-
         app.get('/service', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query).project({ name: 1 });
@@ -176,8 +177,8 @@ async function run() {
                 return res.send({ success: false, booking: exists })
             }
             const result = await bookingCollection.insertOne(booking);
-            console.log('sending email');
-            sendAppointmentEmail(booking);
+
+
             return res.send({ success: true, result });
         });
 
